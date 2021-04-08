@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 
 class Game(object):
 
@@ -26,9 +27,10 @@ class Game(object):
 
     def select_cards(self):
         self.round_cards = []
+        print(f'\nCarta para cima: {self.turned_card}')
         for player in range(self.players):
             player_deck = self.players_decks[player]
-            print(f'\nCarta para cima: {self.turned_card}')
+            # print(f'\nCarta para cima: {self.turned_card}')
             # print(f'Jogador {player+1}: Escolha uma carta:')
             # for card in player_deck:
             #     print(f'\t[{player_deck.index(card)}] - {card}')
@@ -40,9 +42,21 @@ class Game(object):
 
     def round(self):
         round_cards = self.round_cards[:]
-        self.card_order = self.numbers[:]
-        self.card_order.remove(self.manille)
-        self.card_order.append(self.manille)
-
-
+        print(round_cards)
+        self.cards_order = self.numbers[:]
+        self.cards_order.remove(self.manille)
+        self.cards_order.append(self.manille)
+        card_values = [(self.cards_order.index(card[0])+1) for card in round_cards]
+        max_value = max(card_values)
+        values_dict = dict(Counter(card_values))
+        if values_dict[max_value] != 1 and max_value != 10:
+            print('Empate')
+        elif values_dict[max_value] != 1 and max_value == 10:
+            suits_values = [(self.suits[:].index(card[1])+1) for card in round_cards]
+            winner = suits_values.index(max(suits_values))
+            print(f'Jogador {winner+1} venceu!')
+        else:
+            winner = card_values.index(max(card_values))
+            print(f'Jogador {winner + 1} venceu!')
+            pass
 
