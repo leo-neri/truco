@@ -1,5 +1,6 @@
 import random
 from collections import Counter
+import operator
 
 class Game(object):
 
@@ -39,8 +40,10 @@ class Game(object):
             # print(f'Insira o dígito: {choice}')
             # print(f'Carta escolhida: {player_deck[choice]}')
             self.round_cards.append(player_deck[choice])
+            del self.players_decks[player][choice]
 
-    def round(self):
+
+    def get_winner(self):
         round_cards = self.round_cards[:]
         print(round_cards)
         self.cards_order = self.numbers[:]
@@ -50,13 +53,33 @@ class Game(object):
         max_value = max(card_values)
         values_dict = dict(Counter(card_values))
         if values_dict[max_value] != 1 and max_value != 10:
-            print('Empate')
+            print('Empate!')
+            return None
         elif values_dict[max_value] != 1 and max_value == 10:
             suits_values = [(self.suits[:].index(card[1])+1) for card in round_cards]
             winner = suits_values.index(max(suits_values))
             print(f'Jogador {winner+1} venceu!')
+            return winner
         else:
             winner = card_values.index(max(card_values))
             print(f'Jogador {winner + 1} venceu!')
-            pass
+            return winner
+
+    def round(self):
+        round_score = [0, 0]
+        first_round_winner = 0
+        while max(round_score) < 2 or min(round_score) == 2:
+            try:
+                Game.select_cards(self=self)
+                winner = Game.get_winner(self=self)
+                if winner is not None:
+                    round_score[winner] += 1
+                    if max(round_score) == 0:
+                        first_round_winner = winner
+                else:
+                    round_score = list(map(operator.add, round_score, [1, 1]))
+                print(round_score)
+            except:
+                print(f'Jogador {first_round_winner+1} venceu!')
+                break
 
