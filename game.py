@@ -43,6 +43,6 @@ class Game(object):
         self.card_order = self.numbers[:]
         self.card_order.remove(self.manille)
         self.card_order.append(self.manille)
-        card_values = []
+
 
 
