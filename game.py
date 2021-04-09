@@ -1,6 +1,6 @@
-import random
 from collections import Counter
 import operator
+import random
 
 class Game(object):
 
@@ -9,7 +9,7 @@ class Game(object):
         self.numbers = ['4', '5', '6', '7', 'Q', 'J', 'K', 'A', '2', '3']
         self.deck = [number + suit for number in self.numbers for suit in self.suits]
         self.players = players
-        self. round_value = 1
+        self.round_value = 1
         self.score = [0, 0]
 
     def deal(self):
@@ -28,24 +28,35 @@ class Game(object):
         except:
             self.manille = '4'
 
-    def select_cards(self, hide=False):
-        self.round_cards = []
-        print(f'\nCarta para cima: {self.turned_card}')
-        for player in range(self.players):
+    def display_cards(self, player, hide=False, round_value=1, turned_down=False):
             player_deck = self.players_decks[player]
             print(f'\nCarta para cima: {self.turned_card}')
-            print(f'Jogador {player+1}: Escolha uma carta:')
+            print(f'Jogador {player + 1}: Escolha uma carta{"para esconder" if turned_down else ""}:')
             for card in player_deck:
                 if hide:
                     print(f'\t[{player_deck.index(card)}] - XXX')
                 else:
                     print(f'\t[{player_deck.index(card)}] - {card}')
+            if round_value == 1:
+                print('T - Truco')
+            elif round_value == 3:
+                print('6 - Seis')
+            elif round_value == 6:
+                print('9 - Nove')
+            elif round_value == 9:
+                print('12 - Doze')
+            print('P - Passar')
+
+    def select_cards(self, hide=False):
+        self.round_cards = []
+        for player in range(self.players):
+            self.display_cards(player=player, hide=hide)
             # choice = int(input('Insira o dígito: '))
             choice = 0
-            # print(f'Insira o dígito: {choice}')
-            # print(f'Carta escolhida: {player_deck[choice]}')
-            self.round_cards.append(player_deck[choice])
-            del self.players_decks[player][choice]
+            for player in range(self.players):
+                player_deck = self.players_decks[player]
+                self.round_cards.append(player_deck[choice])
+                del self.players_decks[player][choice]
 
     def battle(self):
         round_cards = self.round_cards[:]
@@ -83,7 +94,7 @@ class Game(object):
                 else:
                     round_score = list(map(operator.add, round_score, [1, 1]))
                 print(round_score)
-            except:
+            except Exception as e:
                 print(f'Jogador {first_round_winner + 1} venceu!')
                 break
         if round_score == [3, 3]:
@@ -91,14 +102,14 @@ class Game(object):
             print('\nA rodada empatou!')
         else:
             round_winner = round_score.index(max(round_score))
-            print(f'\nJogador {round_winner + 1} venceu a rodada!')
+            print(f'Jogador {round_winner + 1} venceu a rodada!')
         return round_winner
 
     def round(self, hide=False):
         round_winner = self.turn(hide=hide)
         if round_winner is not None:
-            self.score[round_winner] += 1
-        print(self.score)
+            self.score[round_winner] += self.round_value
+        print(f'\nPlacar: {self.score[0]} x {self.score[1]}')
 
     def play(self):
         while max(self.score) < 12:
@@ -106,7 +117,7 @@ class Game(object):
             if self.score != [11, 11]:
                 self.round()
             else:
-                input('ss')
                 self.round(hide=True)
-                input('ee')
+        winner = self.score.index(max(self.score))
+        print(f'Jogador {winner+1} venceu o jogo por {self.score[0]} x {self.score[1]}!')
         self.score = [0, 0]
