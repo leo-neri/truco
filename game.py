@@ -28,7 +28,7 @@ class Game(object):
         except:
             self.manille = '4'
 
-    def display_cards(self, player, hide=False, round_value=1, turned_down=False):
+    def display_cards(self, player, hide=False, turned_down=False):
             player_deck = self.players_decks[player]
             print(f'\nCarta para cima: {self.turned_card}')
             print(f'Jogador {player + 1}: Escolha uma carta{"para esconder" if turned_down else ""}:')
@@ -37,26 +37,49 @@ class Game(object):
                     print(f'\t[{player_deck.index(card)}] - XXX')
                 else:
                     print(f'\t[{player_deck.index(card)}] - {card}')
-            if round_value == 1:
-                print('T - Truco')
-            elif round_value == 3:
-                print('6 - Seis')
-            elif round_value == 6:
-                print('9 - Nove')
-            elif round_value == 9:
-                print('12 - Doze')
-            print('P - Passar')
+            if self.round_value == 1:
+                print('\t[T] - Truco')
+            elif self.round_value == 3:
+                print('\t[6] - Seis')
+            elif self.round_value == 6:
+                print('\t[9] - Nove')
+            elif self.round_value == 9:
+                print('\t[12] - Doze')
 
     def select_cards(self, hide=False):
         self.round_cards = []
         for player in range(self.players):
             self.display_cards(player=player, hide=hide)
-            # choice = int(input('Insira o dígito: '))
-            choice = 0
-            for player in range(self.players):
-                player_deck = self.players_decks[player]
-                self.round_cards.append(player_deck[choice])
-                del self.players_decks[player][choice]
+            while True:
+                try:
+                    choice = input('Insira a opção: ').upper()
+                    # choice = '0'
+                    if choice == 'T':
+                        self.accept(value=choice)
+                        self.round_value = 3
+                        print('TRUCO!')
+                        continue
+                    elif choice == '6':
+                        self.round_value = 6
+                        print('SEIS!')
+                        continue
+                    elif choice == '9':
+                        self.round_value = 9
+                        print('NOVE!')
+                        continue
+                    elif choice == '12':
+                        self.round_value = 12
+                        print('DOZE!')
+                        continue
+                    else:
+                        choice = int(choice)
+                    player_deck = self.players_decks[player]
+                    self.round_cards.append(player_deck[choice])
+                    del self.players_decks[player][choice]
+                    break
+                except:
+                    print('Insira uma opção válida!')
+                    continue
 
     def battle(self):
         round_cards = self.round_cards[:]
@@ -94,7 +117,7 @@ class Game(object):
                 else:
                     round_score = list(map(operator.add, round_score, [1, 1]))
                 print(round_score)
-            except Exception as e:
+            except:
                 print(f'Jogador {first_round_winner + 1} venceu!')
                 break
         if round_score == [3, 3]:
@@ -111,6 +134,20 @@ class Game(object):
             self.score[round_winner] += self.round_value
         print(f'\nPlacar: {self.score[0]} x {self.score[1]}')
 
+    def accept(self, value):
+        values_dict = {'T': 'Truco', '6': 'Seis', '9': 'Nove', '12': 'Doze'}
+        print(f'O oponente pediu {values_dict[value]}. O que deseja fazer?')
+        print('[C] - Correr')
+        print('[A] - Aceitar')
+        print(f'[P] - Pedir {values_dict[list(values_dict.keys())[list(values_dict.keys()).index(value) + 1]].lower()}')
+        # option = input('Insira a opção: ').upper()
+        # if option == 'C':
+        #     print('Correu!')
+        # if option == 'A':
+        #     print('Aceitou!')
+        # if option == 'P':
+        #     print(f'Pediu {values_dict[list(values_dict.keys())[list(values_dict.keys()).index(value) + 1]].lower()}')
+
     def play(self):
         while max(self.score) < 12:
             self.deal()
@@ -121,3 +158,4 @@ class Game(object):
         winner = self.score.index(max(self.score))
         print(f'Jogador {winner+1} venceu o jogo por {self.score[0]} x {self.score[1]}!')
         self.score = [0, 0]
+
