@@ -9,6 +9,8 @@ class Game(object):
         self.numbers = ['4', '5', '6', '7', 'Q', 'J', 'K', 'A', '2', '3']
         self.deck = [number + suit for number in self.numbers for suit in self.suits]
         self.players = players
+        self. round_value = 1
+        self.score = [0, 0]
 
     def deal(self):
         round_deck = self.deck[:]
@@ -26,15 +28,18 @@ class Game(object):
         except:
             self.manille = '4'
 
-    def select_cards(self):
+    def select_cards(self, hide=False):
         self.round_cards = []
         print(f'\nCarta para cima: {self.turned_card}')
         for player in range(self.players):
             player_deck = self.players_decks[player]
-            # print(f'\nCarta para cima: {self.turned_card}')
-            # print(f'Jogador {player+1}: Escolha uma carta:')
-            # for card in player_deck:
-            #     print(f'\t[{player_deck.index(card)}] - {card}')
+            print(f'\nCarta para cima: {self.turned_card}')
+            print(f'Jogador {player+1}: Escolha uma carta:')
+            for card in player_deck:
+                if hide:
+                    print(f'\t[{player_deck.index(card)}] - XXX')
+                else:
+                    print(f'\t[{player_deck.index(card)}] - {card}')
             # choice = int(input('Insira o dígito: '))
             choice = 0
             # print(f'Insira o dígito: {choice}')
@@ -42,8 +47,7 @@ class Game(object):
             self.round_cards.append(player_deck[choice])
             del self.players_decks[player][choice]
 
-
-    def get_winner(self):
+    def battle(self):
         round_cards = self.round_cards[:]
         print(round_cards)
         self.cards_order = self.numbers[:]
@@ -65,21 +69,44 @@ class Game(object):
             print(f'Jogador {winner + 1} venceu!')
             return winner
 
-    def round(self):
+    def turn(self, hide=False):
         round_score = [0, 0]
-        first_round_winner = 0
-        while max(round_score) < 2 or min(round_score) == 2:
+        first_round_winner = None
+        while (max(round_score) < 2 or (min(round_score) == 2 and max(round_score) != 3)) or round_score == [2, 2]:
             try:
-                Game.select_cards(self=self)
-                winner = Game.get_winner(self=self)
+                self.select_cards(hide=hide)
+                winner = self.battle()
                 if winner is not None:
-                    round_score[winner] += 1
                     if max(round_score) == 0:
                         first_round_winner = winner
+                    round_score[winner] += 1
                 else:
                     round_score = list(map(operator.add, round_score, [1, 1]))
                 print(round_score)
             except:
-                print(f'Jogador {first_round_winner+1} venceu!')
+                print(f'Jogador {first_round_winner + 1} venceu!')
                 break
+        if round_score == [3, 3]:
+            round_winner = None
+            print('\nA rodada empatou!')
+        else:
+            round_winner = round_score.index(max(round_score))
+            print(f'\nJogador {round_winner + 1} venceu a rodada!')
+        return round_winner
 
+    def round(self, hide=False):
+        round_winner = self.turn(hide=hide)
+        if round_winner is not None:
+            self.score[round_winner] += 1
+        print(self.score)
+
+    def play(self):
+        while max(self.score) < 12:
+            self.deal()
+            if self.score != [11, 11]:
+                self.round()
+            else:
+                input('ss')
+                self.round(hide=True)
+                input('ee')
+        self.score = [0, 0]
